@@ -1,7 +1,10 @@
 import { IReactronComponentContext } from '@schirkan/reactron-interfaces';
 import * as React from 'react';
+import { IBringService } from '../../../../src/common/interfaces/IBringService';
+import { IShoppingList } from '../../../../src/common/interfaces/IShoppingList';
 
 import styles from './ShoppingList.scss';
+
 // tslint:disable:no-string-literal
 
 export interface IShoppingListProps {
@@ -9,7 +12,7 @@ export interface IShoppingListProps {
 }
 
 interface IShoppingListState {
-
+  list?: IShoppingList;
 }
 
 export class ShoppingList extends React.Component<IShoppingListProps, IShoppingListState> {
@@ -22,22 +25,20 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
   }
 
   public componentDidMount() {
-    // const service = this.context.getService<IWeatherService>('WeatherService', 'reactron-openweathermap');
-    // if (service) {
-    //   service.getFiveDaysForecast({ zip: this.props.location.zip, cityName: this.props.location.cityName })
-    //     .then((response: any) => {
-    //       this.setState({
-    //         weatherForecast: response,
-    //         units: service.getOptions && service.getOptions().units
-    //       });
-    //     });
-    // }
+    const service = this.context.getService<IBringService>('BringService');
+    if (service) {
+      service.getList().then((response: any) => this.setState({ list: response }));
+    }
   }
 
   public render() {
     return (
       <section className={styles['ShoppingList']}>
-        TEST
+        <ul>
+          {this.state.list && this.state.list.items.map(item => (
+            <li>{item.name}</li>
+          ))}
+        </ul>
       </section>
     );
   }
