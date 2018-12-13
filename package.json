@@ -11,6 +11,7 @@
         "url": "https://github.com/schirkan/reactron-bring-shopping-list"
     },
     "browser": "dist/bundle.browser.js",
+    "main": "dist/bundle.server.js",
     "scripts": {
         "build": "npm run build:server && npm run build:browser",
         "build:browser": "rollup -c rollup.config.browser.js",

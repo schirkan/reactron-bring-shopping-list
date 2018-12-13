@@ -76,19 +76,15 @@ System.register(['react'], function (exports, module) {
                     return _this;
                 }
                 ShoppingList.prototype.componentDidMount = function () {
-                    // const service = this.context.getService<IWeatherService>('WeatherService', 'reactron-openweathermap');
-                    // if (service) {
-                    //   service.getFiveDaysForecast({ zip: this.props.location.zip, cityName: this.props.location.cityName })
-                    //     .then((response: any) => {
-                    //       this.setState({
-                    //         weatherForecast: response,
-                    //         units: service.getOptions && service.getOptions().units
-                    //       });
-                    //     });
-                    // }
+                    var _this = this;
+                    var service = this.context.getService('BringService');
+                    if (service) {
+                        service.getList().then(function (response) { return _this.setState({ list: response }); });
+                    }
                 };
                 ShoppingList.prototype.render = function () {
-                    return (createElement("section", { className: styles['ShoppingList'] }, "TEST"));
+                    return (createElement("section", { className: styles['ShoppingList'] },
+                        createElement("ul", null, this.state.list && this.state.list.items.map(function (item) { return (createElement("li", null, item.name)); }))));
                 };
                 return ShoppingList;
             }(Component)));
@@ -99,42 +95,7 @@ System.register(['react'], function (exports, module) {
                     description: 'ShoppingList',
                     displayName: 'ShoppingList',
                     type: 'content',
-                    fields: [{
-                            name: 'location',
-                            displayName: 'Location',
-                            valueType: 'object',
-                            fields: [{
-                                    name: 'cityName',
-                                    description: 'City Name',
-                                    displayName: 'City Name',
-                                    valueType: 'string'
-                                }, {
-                                    name: 'zip',
-                                    description: 'Zip, Country Code',
-                                    displayName: 'Zip, Country Code',
-                                    valueType: 'string'
-                                }],
-                            inputControl: function (props) {
-                                return props && props.value && (props.value.cityName || props.value.zip);
-                            }
-                        }, {
-                            name: 'infoItems',
-                            displayName: 'Infos',
-                            valueType: 'string',
-                            isArray: true,
-                            values: [
-                                { value: 'temp', text: 'Temperature' },
-                                { value: 'rain', text: 'Rain' },
-                                { value: 'pressure', text: 'Pressure' },
-                                { value: 'clouds', text: 'Clouds' },
-                                { value: 'humidity', text: 'Humidity' },
-                                { value: 'wind', text: 'Wind' }
-                            ]
-                        }, {
-                            name: 'contentId',
-                            displayName: 'Content',
-                            valueType: 'webComponent',
-                        }]
+                    fields: []
                 }]);
 
         }
