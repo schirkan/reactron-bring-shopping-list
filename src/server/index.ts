@@ -18,7 +18,16 @@ export const services: IReactronServiceDefinition[] = [{
         displayName: 'Password',
         description: 'Password',
         name: 'password',
-        valueType: 'string',
+        valueType: 'password',
+    }, {
+        defaultValue: 5,
+        description: 'Cache duration in minutes',
+        displayName: 'Cache duration (min)',
+        name: 'cacheDuration',
+        valueType: 'number',
+        minValue: 0,
+        maxValue: 120,
+        stepSize: 5
     }],
     name: 'BringService',
     service: BringService
