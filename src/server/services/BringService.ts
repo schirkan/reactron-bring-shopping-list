@@ -42,6 +42,7 @@ export class BringService implements IBringService {
     this.bringUUID = loginReponse.uuid;
     this.bringListUUID = loginReponse.bringListUUID;
 
+    console.log('loginReponse', loginReponse);
     console.log('bringUUID', this.bringUUID);
     console.log('bringListUUID', this.bringListUUID);
 
@@ -56,9 +57,14 @@ export class BringService implements IBringService {
       };
     }
 
-    const itemsResponse = await this.getItems();
-    return itemsResponse.body;
+    const list = await this.getItems();
+    console.log('list', list);
 
+    return {
+      uuid: list.uuid,
+      name: '',
+      items: list.purchase
+    }
 
     // const response = await request.get('', { json: true, resolveWithFullResponse: true }) as request.FullResponse;
     // return response;
@@ -88,48 +94,48 @@ export class BringService implements IBringService {
   }
 
   // Get all items from the current selected shopping list
-  public getItems() {
-    return this.getResponse('get', "bringlists/" + this.bringListUUID);
+  private getItems() {
+    return this.getResponse('get', "v2/bringlists/" + this.bringListUUID);
   }
 
   // Save an item to your current shopping list
-  public saveItem(itemName: string, specification?: string) {
-    return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=" + itemName + "&recently=&specification=" + specification + "&remove=&sender=null");
-  }
+  // private saveItem(itemName: string, specification?: string) {
+  //   return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=" + itemName + "&recently=&specification=" + specification + "&remove=&sender=null");
+  // }
 
-  // remove an item from your current shopping list
-  public removeItem(itemName: string) {
-    return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=&recently=&specification=&remove=" + itemName + "&sender=null");
-  }
+  // // remove an item from your current shopping list
+  // private removeItem(itemName: string) {
+  //   return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=&recently=&specification=&remove=" + itemName + "&sender=null");
+  // }
 
-  // Search for an item
-  public searchItem(search: string) {
-    return this.getResponse('get', "bringlistitemdetails/", "?listUuid=" + this.bringListUUID + "&itemId=" + search);
-  }
+  // // Search for an item
+  // private searchItem(search: string) {
+  //   return this.getResponse('get', "bringlistitemdetails/", "?listUuid=" + this.bringListUUID + "&itemId=" + search);
+  // }
 
-  // Hidden Icons? Don't know what this is used for
-  public loadProducts() {
-    return this.getResponse('get', "bringproducts");
-  }
+  // // Hidden Icons? Don't know what this is used for
+  // private loadProducts() {
+  //   return this.getResponse('get', "bringproducts");
+  // }
 
-  // Found Icons? Don't know what this is used for
-  public loadFeatures() {
-    return this.getResponse('get', "bringusers/" + this.bringUUID + "/features");
-  }
+  // // Found Icons? Don't know what this is used for
+  // private loadFeatures() {
+  //   return this.getResponse('get', "bringusers/" + this.bringUUID + "/features");
+  // }
 
-  // Loads all shopping lists
-  public loadLists() {
-    return this.getResponse('get', "bringusers/" + this.bringUUID + "/lists");
-  }
+  // // Loads all shopping lists
+  // private loadLists() {
+  //   return this.getResponse('get', "bringusers/" + this.bringUUID + "/lists");
+  // }
 
-  // Get all users from a shopping list
-  public getAllUsersFromList(listUUID: string) {
-    return this.getResponse('get', "bringlists/" + listUUID + "/users");
-  }
+  // // Get all users from a shopping list
+  // private getAllUsersFromList(listUUID: string) {
+  //   return this.getResponse('get', "bringlists/" + listUUID + "/users");
+  // }
 
-  public getUserSettings() {
-    return this.getResponse('get', "bringusersettings/" + this.bringUUID);
-  }
+  // private getUserSettings() {
+  //   return this.getResponse('get', "bringusersettings/" + this.bringUUID);
+  // }
 
   // Handles the request to the server
   // private request(method: string, url: string, parameter: string, customHeader = false) {

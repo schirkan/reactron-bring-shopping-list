@@ -95,7 +95,7 @@ var BringService = /** @class */ (function () {
     };
     BringService.prototype.getList = function () {
         return __awaiter(this, void 0, Promise, function () {
-            var loginReponse, itemsResponse;
+            var loginReponse, list;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.login()];
@@ -103,6 +103,7 @@ var BringService = /** @class */ (function () {
                         loginReponse = _a.sent();
                         this.bringUUID = loginReponse.uuid;
                         this.bringListUUID = loginReponse.bringListUUID;
+                        console.log('loginReponse', loginReponse);
                         console.log('bringUUID', this.bringUUID);
                         console.log('bringListUUID', this.bringListUUID);
                         if (!this.bringUUID) {
@@ -117,8 +118,16 @@ var BringService = /** @class */ (function () {
                         }
                         return [4 /*yield*/, this.getItems()];
                     case 2:
-                        itemsResponse = _a.sent();
-                        return [2 /*return*/, itemsResponse.body];
+                        list = _a.sent();
+                        console.log('list', list);
+                        return [2 /*return*/, {
+                                uuid: list.uuid,
+                                name: '',
+                                items: list.purchase
+                            }
+                            // const response = await request.get('', { json: true, resolveWithFullResponse: true }) as request.FullResponse;
+                            // return response;
+                        ];
                 }
             });
         });
@@ -143,39 +152,39 @@ var BringService = /** @class */ (function () {
     };
     // Get all items from the current selected shopping list
     BringService.prototype.getItems = function () {
-        return this.getResponse('get', "bringlists/" + this.bringListUUID);
+        return this.getResponse('get', "v2/bringlists/" + this.bringListUUID);
     };
     // Save an item to your current shopping list
-    BringService.prototype.saveItem = function (itemName, specification) {
-        return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=" + itemName + "&recently=&specification=" + specification + "&remove=&sender=null");
-    };
-    // remove an item from your current shopping list
-    BringService.prototype.removeItem = function (itemName) {
-        return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=&recently=&specification=&remove=" + itemName + "&sender=null");
-    };
-    // Search for an item
-    BringService.prototype.searchItem = function (search) {
-        return this.getResponse('get', "bringlistitemdetails/", "?listUuid=" + this.bringListUUID + "&itemId=" + search);
-    };
-    // Hidden Icons? Don't know what this is used for
-    BringService.prototype.loadProducts = function () {
-        return this.getResponse('get', "bringproducts");
-    };
-    // Found Icons? Don't know what this is used for
-    BringService.prototype.loadFeatures = function () {
-        return this.getResponse('get', "bringusers/" + this.bringUUID + "/features");
-    };
-    // Loads all shopping lists
-    BringService.prototype.loadLists = function () {
-        return this.getResponse('get', "bringusers/" + this.bringUUID + "/lists");
-    };
-    // Get all users from a shopping list
-    BringService.prototype.getAllUsersFromList = function (listUUID) {
-        return this.getResponse('get', "bringlists/" + listUUID + "/users");
-    };
-    BringService.prototype.getUserSettings = function () {
-        return this.getResponse('get', "bringusersettings/" + this.bringUUID);
-    };
+    // private saveItem(itemName: string, specification?: string) {
+    //   return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=" + itemName + "&recently=&specification=" + specification + "&remove=&sender=null");
+    // }
+    // // remove an item from your current shopping list
+    // private removeItem(itemName: string) {
+    //   return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=&recently=&specification=&remove=" + itemName + "&sender=null");
+    // }
+    // // Search for an item
+    // private searchItem(search: string) {
+    //   return this.getResponse('get', "bringlistitemdetails/", "?listUuid=" + this.bringListUUID + "&itemId=" + search);
+    // }
+    // // Hidden Icons? Don't know what this is used for
+    // private loadProducts() {
+    //   return this.getResponse('get', "bringproducts");
+    // }
+    // // Found Icons? Don't know what this is used for
+    // private loadFeatures() {
+    //   return this.getResponse('get', "bringusers/" + this.bringUUID + "/features");
+    // }
+    // // Loads all shopping lists
+    // private loadLists() {
+    //   return this.getResponse('get', "bringusers/" + this.bringUUID + "/lists");
+    // }
+    // // Get all users from a shopping list
+    // private getAllUsersFromList(listUUID: string) {
+    //   return this.getResponse('get', "bringlists/" + listUUID + "/users");
+    // }
+    // private getUserSettings() {
+    //   return this.getResponse('get', "bringusersettings/" + this.bringUUID);
+    // }
     // Handles the request to the server
     // private request(method: string, url: string, parameter: string, customHeader = false) {
     // ch = curl_init();

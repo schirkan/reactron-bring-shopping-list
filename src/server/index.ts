@@ -14,7 +14,7 @@ export const services: IReactronServiceDefinition[] = [{
         description: 'Username',
         name: 'username',
         valueType: 'string',
-    },{
+    }, {
         displayName: 'Password',
         description: 'Password',
         name: 'password',
