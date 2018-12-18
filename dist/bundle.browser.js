@@ -1,9 +1,10 @@
 System.register(['react'], function (exports, module) {
     'use strict';
-    var createElement, Component;
+    var createElement, Fragment, Component;
     return {
         setters: [function (module) {
             createElement = module.createElement;
+            Fragment = module.Fragment;
             Component = module.Component;
         }],
         execute: function () {
@@ -79,12 +80,19 @@ System.register(['react'], function (exports, module) {
                     var _this = this;
                     var service = this.context.getService('BringService');
                     if (service) {
-                        service.getList().then(function (response) { return _this.setState({ list: response }); });
+                        service.getDefaultList().then(function (response) { return _this.setState({ list: response }); });
                     }
                 };
+                ShoppingList.prototype.renderList = function () {
+                    if (!this.state.list) {
+                        return null;
+                    }
+                    return (createElement(Fragment, null,
+                        createElement("h2", null, this.state.list.name),
+                        createElement("ul", null, this.state.list.items.map(function (item) { return (createElement("li", { key: item.name }, item.name)); }))));
+                };
                 ShoppingList.prototype.render = function () {
-                    return (createElement("section", { className: styles['ShoppingList'] },
-                        createElement("ul", null, this.state.list && this.state.list.items.map(function (item) { return (createElement("li", null, item.name)); }))));
+                    return (createElement("section", { className: styles['ShoppingList'] }, this.renderList()));
                 };
                 return ShoppingList;
             }(Component)));

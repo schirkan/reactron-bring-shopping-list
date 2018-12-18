@@ -27,18 +27,30 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
   public componentDidMount() {
     const service = this.context.getService<IBringService>('BringService');
     if (service) {
-      service.getList().then((response: any) => this.setState({ list: response }));
+      service.getDefaultList().then((response: any) => this.setState({ list: response }));
     }
+  }
+
+  private renderList() {
+    if (!this.state.list) {
+      return null;
+    }
+    return (
+      <React.Fragment>
+        <h2>{this.state.list.name}</h2>
+        <ul>
+          {this.state.list.items.map(item => (
+            <li key={item.name}>{item.name}</li>
+          ))}
+        </ul>
+      </React.Fragment>
+    );
   }
 
   public render() {
     return (
       <section className={styles['ShoppingList']}>
-        <ul>
-          {this.state.list && this.state.list.items.map(item => (
-            <li>{item.name}</li>
-          ))}
-        </ul>
+        {this.renderList()}
       </section>
     );
   }

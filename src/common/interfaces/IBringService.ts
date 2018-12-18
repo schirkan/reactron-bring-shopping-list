@@ -3,5 +3,5 @@ import { IBringServiceOptions } from "./IBringServiceOptions";
 import { IShoppingList } from "./IShoppingList";
 
 export interface IBringService extends IReactronService<IBringServiceOptions> {
-  getList(): Promise<IShoppingList>;
+  getDefaultList(): Promise<IShoppingList>;
 }

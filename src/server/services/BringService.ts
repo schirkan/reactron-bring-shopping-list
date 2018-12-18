@@ -10,13 +10,39 @@ interface ICacheItem {
   result: any;
 }
 
-const bringApiUrl = "https://api.getbring.com/rest/";
+interface IBringUserContext {
+  loginTimestamp: number;
+  name: string;
+  email: string;
+  uuid: string;
+  bringListUUID: string;
+  accessToken: string;
+  refreshToken: string;
+  photoPath: string;
+  publicUuid: string;
+  expiresIn: number;
+  lists: IBringList[];
+}
 
-// Service to access the WUnderground API
+interface IBringList {
+  listUuid: string;
+  name: string;
+}
+
+const bringApiUrl = "https://api.getbring.com/rest/v2/";
+
+// Service to access the bring API
 export class BringService implements IBringService {
   private options: IBringServiceOptions;
   private context: IReactronServiceContext
   private cache: { [url: string]: ICacheItem } = {};
+  private userContext?: IBringUserContext;
+
+  public async setOptions(options: IBringServiceOptions): Promise<void> {
+    console.log('BringService.setOptions()');
+    this.options = options;
+    this.userContext = undefined; // reset login
+  }
 
   public async start(context: IReactronServiceContext): Promise<void> {
     this.context = context;
@@ -27,159 +53,126 @@ export class BringService implements IBringService {
     console.log('BringService.stop()');
   }
 
-  public async setOptions(options: IBringServiceOptions): Promise<void> {
-    console.log('BringService.setOptions()');
-    this.options = options;
-  }
-
   public getOptions(): Readonly<IBringServiceOptions> {
     return this.options;
   }
 
-  public async getList(): Promise<IShoppingList> {
-    const loginReponse = await this.login();
+  private async initLogin(): Promise<void> {
+    if (!this.userContext) {
+      // login
+      const loginReponse = await this.login();
 
-    this.bringUUID = loginReponse.uuid;
-    this.bringListUUID = loginReponse.bringListUUID;
-
-    console.log('loginReponse', loginReponse);
-    console.log('bringUUID', this.bringUUID);
-    console.log('bringListUUID', this.bringListUUID);
-
-    if (!this.bringUUID) {
-      return {
-        uuid: 'test',
-        name: 'Liste 1',
-        items: [
-          { name: 'Salami' },
-          { name: 'Käse' },
-        ]
+      this.userContext = {
+        loginTimestamp: new Date().getTime(),
+        name: loginReponse.name,
+        email: loginReponse.email,
+        uuid: loginReponse.uuid,
+        bringListUUID: loginReponse.bringListUUID,
+        accessToken: loginReponse.access_token,
+        refreshToken: loginReponse.refresh_token,
+        expiresIn: loginReponse.expires_in,
+        photoPath: loginReponse.photoPath,
+        publicUuid: loginReponse.publicUuid,
+        lists: []
       };
+
+      // load lists
+      const getListsResponse = await this.getLists();
+      this.userContext.lists = getListsResponse.lists;
     }
-
-    const list = await this.getItems();
-    console.log('list', list);
-
-    return {
-      uuid: list.uuid,
-      name: '',
-      items: list.purchase
-    }
-
-    // const response = await request.get('', { json: true, resolveWithFullResponse: true }) as request.FullResponse;
-    // return response;
-  }
-
-  private bringUUID = "";
-  private bringListUUID = "";
-
-  // public __construct(UUID,listUUID, useLogin = false)
-  // {
-  //   if(useLogin) {
-  //     login = json_decode(this.login(UUID,listUUID),true);
-  //     if(this.answerHttpStatus == 200 && login != "") {
-  //       this.bringUUID = login['uuid'];
-  //       this.bringListUUID = login['bringListUUID'];
-  //     } else {
-  //       die("Wrong Login!");
-  //     }
-  //   } else {
-  //     this.bringUUID = UUID;
-  //     this.bringListUUID = listUUID;
-  //   }
-  // }
-
-  private login() {
-    return this.getResponse('get', "bringlists/", "?email=" + this.options.username + "&password=" + this.options.password, false);
   }
 
   // Get all items from the current selected shopping list
-  private getItems() {
-    return this.getResponse('get', "v2/bringlists/" + this.bringListUUID);
+  public async getDefaultList(): Promise<IShoppingList> {
+    await this.initLogin();
+    if (!this.userContext) {
+      throw new Error('login failed');
+    }
+
+    return this.getList(this.userContext.bringListUUID);
+  }
+
+  public async getList(listUuid: string): Promise<IShoppingList> {
+    await this.initLogin();
+    if (!this.userContext) {
+      throw new Error('login failed');
+    }
+
+    const list = await this.getResponse('get', "bringlists/" + listUuid);
+    const listDetails = this.userContext.lists.find(x => x.listUuid === listUuid);
+
+    return {
+      uuid: list.uuid,
+      name: listDetails && listDetails.name || '-',
+      items: list.purchase
+    }
+  }
+
+  private login() {
+    if (!this.options.username || !this.options.password) {
+      throw new Error('Username/Password missing!');
+    }
+    return this.getResponse('post', "bringauth", "email=" + this.options.username + "&password=" + this.options.password);
+  }
+
+  private getLists() {
+    return this.getResponse('get', "bringusers/" + this.userContext!.uuid + "/lists");
   }
 
   // Save an item to your current shopping list
   // private saveItem(itemName: string, specification?: string) {
   //   return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=" + itemName + "&recently=&specification=" + specification + "&remove=&sender=null");
   // }
-
   // // remove an item from your current shopping list
   // private removeItem(itemName: string) {
   //   return this.getResponse('put', "bringlists/" + this.bringListUUID, "purchase=&recently=&specification=&remove=" + itemName + "&sender=null");
   // }
-
   // // Search for an item
   // private searchItem(search: string) {
   //   return this.getResponse('get', "bringlistitemdetails/", "?listUuid=" + this.bringListUUID + "&itemId=" + search);
   // }
-
   // // Hidden Icons? Don't know what this is used for
   // private loadProducts() {
   //   return this.getResponse('get', "bringproducts");
   // }
-
   // // Found Icons? Don't know what this is used for
   // private loadFeatures() {
   //   return this.getResponse('get', "bringusers/" + this.bringUUID + "/features");
   // }
-
   // // Loads all shopping lists
   // private loadLists() {
   //   return this.getResponse('get', "bringusers/" + this.bringUUID + "/lists");
   // }
-
   // // Get all users from a shopping list
   // private getAllUsersFromList(listUUID: string) {
   //   return this.getResponse('get', "bringlists/" + listUUID + "/users");
   // }
-
   // private getUserSettings() {
   //   return this.getResponse('get', "bringusersettings/" + this.bringUUID);
   // }
 
-  // Handles the request to the server
-  // private request(method: string, url: string, parameter: string, customHeader = false) {
-  // ch = curl_init();
-  // additionalHeaderInfo = "";
-  // switch (method) {
-  //   case 'get':
-  //     curl_setopt(ch, CURLOPT_URL, this.bringRestURL.request.parameter);
-  //     break;
-  //   case 'post':
-  //     curl_setopt(ch, CURLOPT_URL, this.bringRestURL.request);
-  //     curl_setopt(ch, CURLOPT_POST, true);
-  //     curl_setopt(ch, CURLOPT_POSTFIELDS, parameter);
-  //     break;
-  //   case 'put':
-  //     fh = tmpfile();
-  //     fwrite(fh, parameter);
-  //     fseek(fh, 0);
-  //     curl_setopt(ch, CURLOPT_URL, this.bringRestURL.request);
-  //     curl_setopt(ch, CURLOPT_PUT, true);
-  //     curl_setopt(ch, CURLOPT_INFILE, fh);
-  //     curl_setopt(ch, CURLOPT_INFILESIZE, strlen(parameter));
-  //     additionalHeaderInfo = 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8';
-  //     break;
-  // }
-  // curl_setopt(ch, CURLOPT_RETURNTRANSFER, true);
-  // if (customHeader) {
-  //   curl_setopt(ch, CURLOPT_HTTPHEADER, this.getHeader((additionalHeaderInfo != "") ? additionalHeaderInfo : null));
-  // }
-  // server_output = curl_exec(ch);
-  // this.answerHttpStatus = curl_getinfo(ch, CURLINFO_HTTP_CODE);
-  // curl_close(ch);
-
-  // return server_output;
-  // }
-
   private getHeader() {
+    // tslint:disable:no-unused-expression
+    // tslint:disable:no-string-literal
+
     const header = {
+      'Origin': 'https://web.getbring.com',
+      'Referer': 'https://web.getbring.com/login',
+      // 'X-BRING-CLIENT-INSTANCE-ID': 'Web-xxxxxx',
       'X-BRING-API-KEY': 'cof4Nc6D8saplXjE3h3HXqHH8m7VU2i1Gs0g85Sp',
-      'X-BRING-CLIENT': 'android',
-      'X-BRING-USER-UUID': this.bringUUID,
-      'X-BRING-VERSION': '303070050',
-      'X-BRING-COUNTRY': 'de',
+      'X-BRING-CLIENT': 'webApp',
+      'X-BRING-CLIENT-SOURCE': 'webApp',
+      'X-BRING-COUNTRY': 'DE',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+      'Accept': 'application/json, text/plain, */*'
     };
+
+    if (this.userContext) {
+      header['X-BRING-USER-UUID'] = this.userContext.uuid;
+      header['Authorization'] = 'Bearer ' + this.userContext.accessToken;
+      header['Cookie'] = 'refresh_token=' + this.userContext.refreshToken;
+    }
+
     return header;
   }
 
@@ -189,7 +182,7 @@ export class BringService implements IBringService {
     const validCacheTime = now - (this.options.cacheDuration * 60 * 1000);
 
     url = bringApiUrl + url;
-    if (method === 'get') {
+    if (method === 'get' && parameter) {
       url += parameter;
     }
 
@@ -204,23 +197,28 @@ export class BringService implements IBringService {
         resolveWithFullResponse: true,
         rejectUnauthorized: false,
         headers: sendHeader ? this.getHeader() : {},
-        body: method !== 'get' ? parameter : undefined
+        body: method !== 'get' ? encodeURI(parameter || '') : undefined
       };
       let response: request.FullResponse | undefined;
 
-      switch (method) {
-        case 'get':
-          response = await request.get(url, requestOptions);
-          break;
-        case 'put':
-          response = await request.put(url, requestOptions);
-          break;
-        case 'post':
-          response = await request.post(url, requestOptions);
-          break;
+      try {
+        switch (method) {
+          case 'get':
+            response = await request.get(url, requestOptions);
+            break;
+          case 'put':
+            response = await request.put(url, requestOptions);
+            break;
+          case 'post':
+            requestOptions.headers!['Content-Type'] = 'application/x-www-form-urlencoded';
+            response = await request.post(url, requestOptions);
+            break;
+        }
+        console.log(response && response.body);
+      } catch (error) {
+        console.log(error);
+        throw new Error(JSON.stringify(error));
       }
-
-      console.log(response && response.body);
 
       if (!response) {
         throw new Error('no response');
