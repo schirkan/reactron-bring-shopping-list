@@ -3,7 +3,7 @@ import { BringService } from './services/BringService';
 
 // export interfaces
 export * from '../common/interfaces/IBringService';
-export * from '../common/interfaces/IBringServiceOptions';
+export { IBringApiOptions, IBringList, IShoppingList, IShoppingListItem } from "@schirkan/bring-api";
 
 // export reactron service definition
 export const services: IReactronServiceDefinition[] = [{

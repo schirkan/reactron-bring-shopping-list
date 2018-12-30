@@ -20,6 +20,6 @@ export default {
     ],
     external: [
         'electron',
-        'request-promise-native'
+        '@schirkan/bring-api'
     ]
 };

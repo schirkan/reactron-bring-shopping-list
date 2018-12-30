@@ -1,7 +1,8 @@
+import { IBringApiOptions, IBringList, IShoppingList } from "@schirkan/bring-api";
 import { IReactronService } from "@schirkan/reactron-interfaces";
-import { IBringServiceOptions } from "./IBringServiceOptions";
-import { IShoppingList } from "./IShoppingList";
 
-export interface IBringService extends IReactronService<IBringServiceOptions> {
+export interface IBringService extends IReactronService<IBringApiOptions> {
   getDefaultList(): Promise<IShoppingList>;
+  getList(listUuid: string): Promise<IShoppingList | undefined>;
+  getLists(): Promise<IBringList[]>;
 }
