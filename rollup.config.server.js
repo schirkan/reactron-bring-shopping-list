@@ -12,9 +12,7 @@ export default {
     }],
     plugins: [
         typescript(),
-        babel({
-            exclude: 'node_modules/**'
-        }),
+        babel({ exclude: 'node_modules/**' }),
         resolve(),
         commonjs()
     ],

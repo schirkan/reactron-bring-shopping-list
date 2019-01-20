@@ -1,14 +1,14 @@
 import { IReactronComponentContext } from '@schirkan/reactron-interfaces';
 import * as React from 'react';
 import { IBringService } from '../../../../src/common/interfaces/IBringService';
-import { IShoppingList } from '../../../../src/common/interfaces/IShoppingList';
+import { IShoppingList } from '@schirkan/bring-api';
 
 import styles from './ShoppingList.scss';
 
 // tslint:disable:no-string-literal
 
 export interface IShoppingListProps {
-
+  listUuid?: string;
 }
 
 interface IShoppingListState {
@@ -20,14 +20,17 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
 
   constructor(props: IShoppingListProps) {
     super(props);
-
     this.state = {};
   }
 
   public componentDidMount() {
     const service = this.context.getService<IBringService>('BringService');
     if (service) {
-      service.getDefaultList().then((response: any) => this.setState({ list: response }));
+      if(this.props.listUuid && this.props.listUuid !== 'default'){
+        service.getList(this.props.listUuid).then((response: any) => this.setState({ list: response }));
+      } else {
+        service.getDefaultList().then((response: any) => this.setState({ list: response }));
+      }
     }
   }
 

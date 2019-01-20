@@ -1,11 +1,11 @@
 System.register(['react'], function (exports, module) {
     'use strict';
-    var createElement, Fragment, Component;
+    var Component, createElement, Fragment;
     return {
         setters: [function (module) {
+            Component = module.Component;
             createElement = module.createElement;
             Fragment = module.Fragment;
-            Component = module.Component;
         }],
         execute: function () {
 
@@ -23,19 +23,14 @@ System.register(['react'], function (exports, module) {
             See the Apache Version 2.0 License for specific language governing permissions
             and limitations under the License.
             ***************************************************************************** */
-            /* global Reflect, Promise */
 
-            var extendStatics = function(d, b) {
-                extendStatics = Object.setPrototypeOf ||
-                    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-                return extendStatics(d, b);
-            };
-
-            function __extends(d, b) {
-                extendStatics(d, b);
-                function __() { this.constructor = d; }
-                d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+            function __awaiter(thisArg, _arguments, P, generator) {
+                return new (P || (P = Promise))(function (resolve, reject) {
+                    function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+                    function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+                    function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+                    step((generator = generator.apply(thisArg, _arguments || [])).next());
+                });
             }
 
             function styleInject(css, ref) {
@@ -69,41 +64,56 @@ System.register(['react'], function (exports, module) {
             var styles = {};
             styleInject(css);
 
-            var ShoppingList = exports('ShoppingList', /** @class */ (function (_super) {
-                __extends(ShoppingList, _super);
-                function ShoppingList(props) {
-                    var _this = _super.call(this, props) || this;
-                    _this.state = {};
-                    return _this;
+            class ShoppingList extends Component {
+                constructor(props) {
+                    super(props);
+                    this.state = {};
                 }
-                ShoppingList.prototype.componentDidMount = function () {
-                    var _this = this;
-                    var service = this.context.getService('BringService');
+                componentDidMount() {
+                    const service = this.context.getService('BringService');
                     if (service) {
-                        service.getDefaultList().then(function (response) { return _this.setState({ list: response }); });
+                        if (this.props.listUuid && this.props.listUuid !== 'default') {
+                            service.getList(this.props.listUuid).then((response) => this.setState({ list: response }));
+                        }
+                        else {
+                            service.getDefaultList().then((response) => this.setState({ list: response }));
+                        }
                     }
-                };
-                ShoppingList.prototype.renderList = function () {
+                }
+                renderList() {
                     if (!this.state.list) {
                         return null;
                     }
                     return (createElement(Fragment, null,
                         createElement("h2", null, this.state.list.name),
-                        createElement("ul", null, this.state.list.items.map(function (item) { return (createElement("li", { key: item.name }, item.name)); }))));
-                };
-                ShoppingList.prototype.render = function () {
+                        createElement("ul", null, this.state.list.items.map(item => (createElement("li", { key: item.name }, item.name))))));
+                }
+                render() {
                     return (createElement("section", { className: styles['ShoppingList'] }, this.renderList()));
-                };
-                return ShoppingList;
-            }(Component)));
+                }
+            } exports('ShoppingList', ShoppingList);
 
-            var components = exports('components', [{
+            const components = exports('components', [{
                     component: ShoppingList,
                     name: 'ShoppingList',
                     description: 'ShoppingList',
                     displayName: 'ShoppingList',
                     type: 'content',
-                    fields: []
+                    fields: [{
+                            name: 'listUuid',
+                            defaultValue: 'default',
+                            displayName: 'List',
+                            valueType: 'string',
+                            values: (context) => __awaiter(undefined, void 0, void 0, function* () {
+                                const values = [{ text: 'Default', value: 'default' }];
+                                const service = context.getService('BringService', 'reactron-bring-shopping-list');
+                                if (service) {
+                                    const lists = yield service.getLists();
+                                    values.push(...lists.map(x => ({ value: x.uuid, text: x.name })));
+                                }
+                                return values;
+                            })
+                        }]
                 }]);
 
         }
