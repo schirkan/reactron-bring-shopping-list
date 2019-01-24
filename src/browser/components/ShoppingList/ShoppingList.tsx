@@ -1,4 +1,4 @@
-import { IReactronComponentContext } from '@schirkan/reactron-interfaces';
+import { IReactronComponentContext, topicNames } from '@schirkan/reactron-interfaces';
 import * as React from 'react';
 import { IBringService } from '../../../../src/common/interfaces/IBringService';
 import { IShoppingList } from '@schirkan/bring-api';
@@ -21,9 +21,25 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
   constructor(props: IShoppingListProps) {
     super(props);
     this.state = {};
+    this.loadData = this.loadData.bind(this);
   }
 
-  public async componentDidMount() {
+  public componentDidMount() {
+    this.context.topics.subscribe(topicNames.refresh, this.loadData);
+    this.loadData();
+  }
+
+  public componentWillUnmount() {
+    this.context.topics.unsubscribe(topicNames.refresh, this.loadData);
+  }
+
+  public componentDidUpdate(prevProps: any) {
+    if (JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
+      this.loadData();
+    }
+  }
+
+  private async loadData() {
     const service = await this.context.getService<IBringService>('BringService');
     if (service) {
       if (this.props.listUuid && this.props.listUuid !== 'default') {

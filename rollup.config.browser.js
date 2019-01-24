@@ -19,6 +19,7 @@ export default {
         commonjs(),
     ],
     external: [
+        '@schirkan/reactron-interfaces',
         'react',
         'react-dom'
     ]

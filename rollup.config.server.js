@@ -17,7 +17,8 @@ export default {
         commonjs()
     ],
     external: [
-        'electron',
-        '@schirkan/bring-api'
+        '@schirkan/reactron-interfaces',
+        '@schirkan/bring-api',
+        'electron'
     ]
 };

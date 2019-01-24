@@ -1,8 +1,10 @@
-System.register(['react'], function (exports, module) {
+System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, module) {
     'use strict';
-    var Component, createElement, Fragment;
+    var topicNames, Component, createElement, Fragment;
     return {
         setters: [function (module) {
+            topicNames = module.topicNames;
+        }, function (module) {
             Component = module.Component;
             createElement = module.createElement;
             Fragment = module.Fragment;
@@ -68,8 +70,21 @@ System.register(['react'], function (exports, module) {
                 constructor(props) {
                     super(props);
                     this.state = {};
+                    this.loadData = this.loadData.bind(this);
                 }
                 componentDidMount() {
+                    this.context.topics.subscribe(topicNames.refresh, this.loadData);
+                    this.loadData();
+                }
+                componentWillUnmount() {
+                    this.context.topics.unsubscribe(topicNames.refresh, this.loadData);
+                }
+                componentDidUpdate(prevProps) {
+                    if (JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
+                        this.loadData();
+                    }
+                }
+                loadData() {
                     return __awaiter(this, void 0, void 0, function* () {
                         const service = yield this.context.getService('BringService');
                         if (service) {
