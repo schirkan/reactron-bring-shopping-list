@@ -15,7 +15,7 @@ export const components: IReactronComponentDefinition[] = [{
     valueType: 'string',
     values: async (context) => {
       const values = [{ text: 'Default', value: 'default' }];
-      const service = context.getService<IBringService>('BringService', 'reactron-bring-shopping-list');
+      const service = await context.getService<IBringService>('BringService', 'reactron-bring-shopping-list');
       if (service) {
         const lists = await service.getLists();
         values.push(...lists.map(x => ({ value: x.uuid, text: x.name })));

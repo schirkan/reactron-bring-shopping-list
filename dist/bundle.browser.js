@@ -70,15 +70,19 @@ System.register(['react'], function (exports, module) {
                     this.state = {};
                 }
                 componentDidMount() {
-                    const service = this.context.getService('BringService');
-                    if (service) {
-                        if (this.props.listUuid && this.props.listUuid !== 'default') {
-                            service.getList(this.props.listUuid).then((response) => this.setState({ list: response }));
+                    return __awaiter(this, void 0, void 0, function* () {
+                        const service = yield this.context.getService('BringService');
+                        if (service) {
+                            if (this.props.listUuid && this.props.listUuid !== 'default') {
+                                const list = yield service.getList(this.props.listUuid);
+                                this.setState({ list });
+                            }
+                            else {
+                                const list = yield service.getDefaultList();
+                                this.setState({ list });
+                            }
                         }
-                        else {
-                            service.getDefaultList().then((response) => this.setState({ list: response }));
-                        }
-                    }
+                    });
                 }
                 renderList() {
                     if (!this.state.list) {
@@ -106,7 +110,7 @@ System.register(['react'], function (exports, module) {
                             valueType: 'string',
                             values: (context) => __awaiter(undefined, void 0, void 0, function* () {
                                 const values = [{ text: 'Default', value: 'default' }];
-                                const service = context.getService('BringService', 'reactron-bring-shopping-list');
+                                const service = yield context.getService('BringService', 'reactron-bring-shopping-list');
                                 if (service) {
                                     const lists = yield service.getLists();
                                     values.push(...lists.map(x => ({ value: x.uuid, text: x.name })));

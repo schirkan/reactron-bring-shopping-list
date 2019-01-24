@@ -23,13 +23,15 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
     this.state = {};
   }
 
-  public componentDidMount() {
-    const service = this.context.getService<IBringService>('BringService');
+  public async componentDidMount() {
+    const service = await this.context.getService<IBringService>('BringService');
     if (service) {
-      if(this.props.listUuid && this.props.listUuid !== 'default'){
-        service.getList(this.props.listUuid).then((response: any) => this.setState({ list: response }));
+      if (this.props.listUuid && this.props.listUuid !== 'default') {
+        const list = await service.getList(this.props.listUuid)
+        this.setState({ list });
       } else {
-        service.getDefaultList().then((response: any) => this.setState({ list: response }));
+        const list = await service.getDefaultList();
+        this.setState({ list });
       }
     }
   }
