@@ -1,6 +1,6 @@
 {
     "name": "reactron-bring-shopping-list",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "author": {
         "name": "Martin Pietschmann",
         "email": "schirkan@gmail.com"
@@ -29,7 +29,7 @@
         "@babel/preset-env": "^7.3.1",
         "@babel/preset-react": "^7.0.0",
         "@babel/register": "^7.0.0",
-        "@schirkan/reactron-interfaces": "^1.0.3",
+        "@schirkan/reactron-interfaces": "^2.0.0-alpha.1",
         "@types/request-promise-native": "^1.0.15",
         "classnames": "^2.2.6",
         "css-loader": "^2.1.0",
@@ -42,7 +42,7 @@
         "rollup-plugin-commonjs": "^9.2.0",
         "rollup-plugin-node-resolve": "^4.0.0",
         "rollup-plugin-postcss": "^1.6.3",
-        "rollup-plugin-serve": "^1.0.0",
+        "rollup-plugin-serve": "^1.0.1",
         "rollup-plugin-typescript": "^1.0.0",
         "rollup-watch": "^4.3.1",
         "style-loader": "^0.23.1",

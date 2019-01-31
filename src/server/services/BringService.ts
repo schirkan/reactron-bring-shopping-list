@@ -9,7 +9,7 @@ export class BringService implements IBringService {
     this.bringApi = new BringApi(options);
   }
 
-  public getOptions(): Readonly<IBringApiOptions> {
+  public async getOptions(): Promise<Readonly<IBringApiOptions>> {
     return this.bringApi.options;
   }
 

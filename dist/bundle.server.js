@@ -36,7 +36,9 @@ class BringService {
         });
     }
     getOptions() {
-        return this.bringApi.options;
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.bringApi.options;
+        });
     }
     getDefaultList() {
         return this.bringApi.getDefaultList();
