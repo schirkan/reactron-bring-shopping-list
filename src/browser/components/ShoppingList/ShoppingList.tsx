@@ -8,10 +8,12 @@ import styles from './ShoppingList.scss';
 // tslint:disable:no-string-literal
 
 export interface IShoppingListProps {
+  showHeader: boolean;
   listUuid?: string;
 }
 
 interface IShoppingListState {
+  loading: boolean;
   list?: IShoppingList;
 }
 
@@ -20,7 +22,7 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
 
   constructor(props: IShoppingListProps) {
     super(props);
-    this.state = {};
+    this.state = { loading: false };
     this.loadData = this.loadData.bind(this);
   }
 
@@ -42,14 +44,27 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
   private async loadData() {
     const service = await this.context.getService<IBringService>('BringService');
     if (service) {
+      this.setState({ loading: true });
+      let list;
       if (this.props.listUuid && this.props.listUuid !== 'default') {
-        const list = await service.getList(this.props.listUuid)
-        this.setState({ list });
+        list = await service.getList(this.props.listUuid)
       } else {
-        const list = await service.getDefaultList();
-        this.setState({ list });
+        list = await service.getDefaultList();
       }
+      this.setState({ list, loading: false });
     }
+  }
+
+  private renderHeader() {
+    if (!this.props.showHeader) {
+      return null;
+    }
+    return (
+      <h2>
+        {this.state.list && this.state.list.name}
+        {(this.state.loading) && this.context.renderLoading(undefined, '1x', { display: 'inline-block', marginLeft: '8px' })}
+      </h2>
+    );
   }
 
   private renderList() {
@@ -57,20 +72,18 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
       return null;
     }
     return (
-      <React.Fragment>
-        <h2>{this.state.list.name}</h2>
-        <ul>
-          {this.state.list.items.map(item => (
-            <li key={item.name}>{item.name}</li>
-          ))}
-        </ul>
-      </React.Fragment>
+      <ul>
+        {this.state.list.items.map(item => (
+          <li key={item.name}>{item.name}</li>
+        ))}
+      </ul>
     );
   }
 
   public render() {
     return (
       <section className={styles['ShoppingList']}>
+        {this.renderHeader()}
         {this.renderList()}
       </section>
     );

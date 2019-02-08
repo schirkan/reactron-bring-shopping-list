@@ -22,6 +22,11 @@ export const components: IReactronComponentDefinition[] = [{
       }
       return values;
     }
+  }, {
+    displayName: 'Show header',
+    name: 'showHeader',
+    valueType: 'boolean',
+    defaultValue: true
   }]
 }];
 

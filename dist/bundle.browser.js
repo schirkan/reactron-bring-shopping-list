@@ -1,13 +1,12 @@
 System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, module) {
     'use strict';
-    var topicNames, Component, createElement, Fragment;
+    var topicNames, Component, createElement;
     return {
         setters: [function (module) {
             topicNames = module.topicNames;
         }, function (module) {
             Component = module.Component;
             createElement = module.createElement;
-            Fragment = module.Fragment;
         }],
         execute: function () {
 
@@ -69,7 +68,7 @@ System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, m
             class ShoppingList extends Component {
                 constructor(props) {
                     super(props);
-                    this.state = {};
+                    this.state = { loading: false };
                     this.loadData = this.loadData.bind(this);
                 }
                 componentDidMount() {
@@ -88,27 +87,36 @@ System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, m
                     return __awaiter(this, void 0, void 0, function* () {
                         const service = yield this.context.getService('BringService');
                         if (service) {
+                            this.setState({ loading: true });
+                            let list;
                             if (this.props.listUuid && this.props.listUuid !== 'default') {
-                                const list = yield service.getList(this.props.listUuid);
-                                this.setState({ list });
+                                list = yield service.getList(this.props.listUuid);
                             }
                             else {
-                                const list = yield service.getDefaultList();
-                                this.setState({ list });
+                                list = yield service.getDefaultList();
                             }
+                            this.setState({ list, loading: false });
                         }
                     });
+                }
+                renderHeader() {
+                    if (!this.props.showHeader) {
+                        return null;
+                    }
+                    return (createElement("h2", null,
+                        this.state.list && this.state.list.name,
+                        (this.state.loading) && this.context.renderLoading(undefined, '1x', { display: 'inline-block', marginLeft: '8px' })));
                 }
                 renderList() {
                     if (!this.state.list) {
                         return null;
                     }
-                    return (createElement(Fragment, null,
-                        createElement("h2", null, this.state.list.name),
-                        createElement("ul", null, this.state.list.items.map(item => (createElement("li", { key: item.name }, item.name))))));
+                    return (createElement("ul", null, this.state.list.items.map(item => (createElement("li", { key: item.name }, item.name)))));
                 }
                 render() {
-                    return (createElement("section", { className: styles['ShoppingList'] }, this.renderList()));
+                    return (createElement("section", { className: styles['ShoppingList'] },
+                        this.renderHeader(),
+                        this.renderList()));
                 }
             } exports('ShoppingList', ShoppingList);
 
@@ -132,6 +140,11 @@ System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, m
                                 }
                                 return values;
                             })
+                        }, {
+                            displayName: 'Show header',
+                            name: 'showHeader',
+                            valueType: 'boolean',
+                            defaultValue: true
                         }]
                 }]);
 
