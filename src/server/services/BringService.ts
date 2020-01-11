@@ -17,7 +17,10 @@ export class BringService implements IBringService {
     return this.bringApi.getDefaultList();
   }
 
-  public getList(listUuid: string): Promise<IShoppingList | undefined> {
+  public getList(listUuid?: string): Promise<IShoppingList | undefined> {
+    if (!listUuid || listUuid === 'default') {
+      return this.bringApi.getDefaultList();
+    }
     return this.bringApi.getList(listUuid);
   }
 

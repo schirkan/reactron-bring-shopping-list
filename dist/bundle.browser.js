@@ -1,4 +1,4 @@
-System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, module) {
+System.register(['@schirkan/reactron-interfaces', 'react'], function (exports) {
     'use strict';
     var topicNames, Component, createElement;
     return {
@@ -68,8 +68,21 @@ System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, m
             class ShoppingList extends Component {
                 constructor(props) {
                     super(props);
+                    this.loadData = () => __awaiter(this, void 0, void 0, function* () {
+                        try {
+                            const service = yield this.context.getService('BringService');
+                            if (service) {
+                                this.setState({ loading: true });
+                                let list = yield service.getList(this.props.listUuid);
+                                this.setState({ list, loading: false });
+                            }
+                        }
+                        catch (error) {
+                            this.context.log.error(error);
+                            this.setState({ loading: false });
+                        }
+                    });
                     this.state = { loading: false };
-                    this.loadData = this.loadData.bind(this);
                 }
                 componentDidMount() {
                     this.context.topics.subscribe(topicNames.refresh, this.loadData);
@@ -82,22 +95,6 @@ System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, m
                     if (JSON.stringify(this.props) !== JSON.stringify(prevProps)) {
                         this.loadData();
                     }
-                }
-                loadData() {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        const service = yield this.context.getService('BringService');
-                        if (service) {
-                            this.setState({ loading: true });
-                            let list;
-                            if (this.props.listUuid && this.props.listUuid !== 'default') {
-                                list = yield service.getList(this.props.listUuid);
-                            }
-                            else {
-                                list = yield service.getDefaultList();
-                            }
-                            this.setState({ list, loading: false });
-                        }
-                    });
                 }
                 renderHeader() {
                     if (!this.props.showHeader) {
@@ -131,7 +128,7 @@ System.register(['@schirkan/reactron-interfaces', 'react'], function (exports, m
                             defaultValue: 'default',
                             displayName: 'List',
                             valueType: 'string',
-                            values: (context) => __awaiter(undefined, void 0, void 0, function* () {
+                            values: (context) => __awaiter(void 0, void 0, void 0, function* () {
                                 const values = [{ text: 'Default', value: 'default' }];
                                 const service = yield context.getService('BringService', 'reactron-bring-shopping-list');
                                 if (service) {

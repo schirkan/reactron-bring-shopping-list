@@ -44,6 +44,9 @@ class BringService {
         return this.bringApi.getDefaultList();
     }
     getList(listUuid) {
+        if (!listUuid || listUuid === 'default') {
+            return this.bringApi.getDefaultList();
+        }
         return this.bringApi.getList(listUuid);
     }
     getLists() {
@@ -79,9 +82,29 @@ const services = [{
         service: BringService
     }];
 
-exports.IBringApiOptions = bringApi.IBringApiOptions;
-exports.IBringList = bringApi.IBringList;
-exports.IShoppingList = bringApi.IShoppingList;
-exports.IShoppingListItem = bringApi.IShoppingListItem;
+Object.defineProperty(exports, 'IBringApiOptions', {
+    enumerable: true,
+    get: function () {
+        return bringApi.IBringApiOptions;
+    }
+});
+Object.defineProperty(exports, 'IBringList', {
+    enumerable: true,
+    get: function () {
+        return bringApi.IBringList;
+    }
+});
+Object.defineProperty(exports, 'IShoppingList', {
+    enumerable: true,
+    get: function () {
+        return bringApi.IShoppingList;
+    }
+});
+Object.defineProperty(exports, 'IShoppingListItem', {
+    enumerable: true,
+    get: function () {
+        return bringApi.IShoppingListItem;
+    }
+});
 exports.services = services;
 //# sourceMappingURL=bundle.server.js.map

@@ -23,7 +23,6 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
   constructor(props: IShoppingListProps) {
     super(props);
     this.state = { loading: false };
-    this.loadData = this.loadData.bind(this);
   }
 
   public componentDidMount() {
@@ -41,17 +40,17 @@ export class ShoppingList extends React.Component<IShoppingListProps, IShoppingL
     }
   }
 
-  private async loadData() {
-    const service = await this.context.getService<IBringService>('BringService');
-    if (service) {
-      this.setState({ loading: true });
-      let list;
-      if (this.props.listUuid && this.props.listUuid !== 'default') {
-        list = await service.getList(this.props.listUuid)
-      } else {
-        list = await service.getDefaultList();
+  private loadData = async () => {
+    try {
+      const service = await this.context.getService<IBringService>('BringService');
+      if (service) {
+        this.setState({ loading: true });
+        let list = await service.getList(this.props.listUuid);
+        this.setState({ list, loading: false });
       }
-      this.setState({ list, loading: false });
+    } catch (error) {
+      this.context.log.error(error);
+      this.setState({ loading: false });
     }
   }
 
